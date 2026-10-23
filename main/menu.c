@@ -6,6 +6,7 @@
 #include "carousel.h"
 #include "icons.h"
 #include "input.h"
+#include "badusb.h"
 #include "osk.h"
 #include "shell.h"
 #include "term.h"
@@ -22,7 +23,7 @@
 #define C_LORA   0x00BCD4
 #define C_PURPLE 0xBF00FF
 
-typedef enum { KIND_CATEGORY, KIND_TERMINAL, KIND_MODULE } Kind;
+typedef enum { KIND_CATEGORY, KIND_TERMINAL, KIND_MODULE, KIND_BADUSB } Kind;
 
 typedef struct {
     const char* label;
@@ -41,6 +42,7 @@ static const HomeItem home[] = {
     {"RFID",     "rfid",      C_RFID,   KIND_MODULE,   "RDM6300 (125 kHz) no IO43"},
     {"LoRa",     "lora",      C_LORA,   KIND_MODULE,   "SX1276/SX1262 (SPI)"},
     {"Infrared", "ir",        C_IR,     KIND_MODULE,   "LED IR + TSOP38238"},
+    {"Bad USB",  "usb",       C_PURPLE, KIND_BADUSB,   NULL},
     {"Arquivos", "folder",    C_PURPLE, KIND_CATEGORY, "arquivos"},
     {"Sistema",  "gear",      C_PURPLE, KIND_CATEGORY, "sistema"},
     {"Utils",    "apps",      C_PURPLE, KIND_CATEGORY, "utils"},
@@ -195,6 +197,9 @@ void menu_open(void) {
                 return;
             case KIND_MODULE:
                 module_screen(item);
+                break;
+            case KIND_BADUSB:
+                badusb_browse();
                 break;
             case KIND_CATEGORY:
                 category_menu(item->data, item->icon, item->accent);

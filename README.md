@@ -68,6 +68,10 @@ Wi-Fi: `wifi connect "MinhaRede" senha` (fica salvo).
 
 **Sons** (alto-falante da placa, mesmos tons do TentacleOS): acorde ao ligar, clique ao navegar e ao teclar no teclado na tela, tom de seleção, sinal de "achou algo" ao fim dos scans, de "gravado" ao salvar arquivo, e de erro. `volume 0` silencia; o volume fica salvo.
 
+## Bad USB
+
+A placa pode virar um teclado USB e digitar um script (DuckyScript) no computador — para automação e **testes autorizados** (use só em máquinas suas ou com permissão). No menu: **Bad USB**. Os scripts ficam em `/sd/badusb/*.txt`; o deck lista, mostra o script e só digita depois que você confirmar **INJETAR**. Enquanto o teclado USB está ativo, o console serial fica indisponível até reiniciar.
+
 ## Documentação
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — módulos, renderização, carrossel, entrada

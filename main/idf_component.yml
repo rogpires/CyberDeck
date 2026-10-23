@@ -1,3 +1,4 @@
 dependencies:
   espressif/esp_lcd_ili9341: "2.1.0"
   espressif/esp_codec_dev: "1.5.10"
+  espressif/esp_tinyusb: "2.2.1"

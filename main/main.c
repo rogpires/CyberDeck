@@ -13,6 +13,7 @@
 #include "statusbar.h"
 #include "storage.h"
 #include "touch.h"
+#include "badusb.h"
 #include "menu.h"
 #include "tools.h"
 #include "term.h"
@@ -79,6 +80,7 @@ void app_main(void) {
     statusbar_init();
     keyboard_init();
     storage_init();
+    badusb_init();
 
     tools_sys_register();
     tools_net_register();

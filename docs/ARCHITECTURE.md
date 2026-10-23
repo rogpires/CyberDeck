@@ -17,6 +17,7 @@ Firmware ESP-IDF v6.1 em C, sem LVGL: tudo é desenhado à mão. Código em `mai
 | `keyboard.c` + `esp_hid_gap.c` | Host BLE HID: procura, pareia ("Just Works"), reconecta, converte relatórios HID em teclas (layout US), repetição de tecla |
 | `wifi.c` | Estação Wi-Fi, credenciais salvas pelo driver, reconexão |
 | `statusbar.c` | Bateria (ADC, média, detecção de carregador) e relógio (SNTP, horário de Brasília) |
+| `badusb.c` + `badusb_hid.c` | Bad USB: teclado USB (TinyUSB) e interpretador de DuckyScript |
 | `power.c` | Desligar (deep sleep), acordar por toque ou BOOT, desligamento automático por inatividade |
 | `storage.c` | Monta o microSD em `/sd` |
 | `shell.c` | Shell: registro de comandos por módulo, edição de linha, histórico, paginador, diretório atual |
@@ -153,6 +154,15 @@ Mesma abordagem do TentacleOS (`ui_feedback.c`): tons senoidais curtos gerados n
 | OFF | 784/120, 659/120, 523/175 | ao desligar (nosso: o boot ao contrário) |
 | PLUG | 1046/45, 1568/55, 2093/80 | carregador conectado (TentacleOS: SD inserido) |
 | UNPLUG | 2093/45, 1568/55, 1046/80 | carregador removido (TentacleOS: SD removido) |
+
+## Bad USB
+
+A placa vira um **teclado USB** (TinyUSB HID) e "digita" um script no computador em que está ligada — automação e teste **autorizado**.
+
+- **Scripts** em `/sd/badusb/*.txt`, em DuckyScript: `REM`, `DELAY ms`, `DEFAULT_DELAY`, `STRING`, `STRINGLN`, `REPEAT n`, teclas (`ENTER`, `TAB`, `F1`..`F12`, setas...) e combos (`GUI r`, `CTRL ALT DELETE`). Layout US, via a tabela `HID_ASCII_TO_KEYCODE` da TinyUSB.
+- **Nunca digita sozinho:** lista os scripts, mostra o escolhido e injeta só depois do botão **INJETAR** na tela. Um exemplo inofensivo é criado no primeiro uso.
+- **Abortar:** o toque continua funcionando durante a injeção (a USB virou teclado, mas a tela é separada); tocar aborta.
+- **Custo:** ligar o HID **substitui o console serial USB** até reiniciar — a mesma porta não pode ser teclado e serial ao mesmo tempo. VID/PID da Espressif (0x303A/0x4010), sem imitar outro fabricante.
 
 ## Ferramentas geradoras
 
