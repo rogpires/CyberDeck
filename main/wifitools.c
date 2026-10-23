@@ -1,5 +1,6 @@
 #include "wifitools.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -67,12 +68,38 @@ static void push_history(int value) {
     }
 }
 
-static void draw(int per_sec, bool alert) {
+// A soft filled circle (anti-aliased), for the radar pulse
+static void disc(Canvas* c, int cx, int cy, float r, uint32_t color, int alpha) {
+    int ri = (int)r + 1;
+    for (int dy = -ri; dy <= ri; dy++) {
+        for (int dx = -ri; dx <= ri; dx++) {
+            float d = r - sqrtf(dx * dx + dy * dy);
+            if (d > 0) ui_blend(c, cx + dx, cy + dy, color, d < 1 ? (int)(d * alpha) : alpha);
+        }
+    }
+}
+
+static void draw(int per_sec, bool alert, int frame) {
     Canvas c = {fb, FB_W, FB_H};
     ui_fill(&c, BG);
     ui_back(&c, 6, 2, ACCENT);
     ui_status(&c, FB_W, 2);
     ui_text(&c, 20, 22, "DETECTOR DEAUTH", &fonts[3], LABEL, false);
+
+    // Radar pulse in the top-right of the title area: expanding rings, faster/red when under attack
+    int rx = FB_W - 150, ry = 28;
+    uint32_t pulse = alert ? DANGER : ACCENT;
+    for (int ring = 0; ring < 3; ring++) {
+        float phase = (frame * (alert ? 0.22f : 0.12f) + ring * 0.7f);
+        float t = phase - (int)phase;            // 0..1
+        float r = 3 + t * 12;
+        int a = (int)((1 - t) * 90);
+        for (int deg = 0; deg < 360; deg += 12) {
+            float rad = deg * 3.14159f / 180;
+            ui_blend(&c, rx + (int)(r * cosf(rad)), ry + (int)(r * sinf(rad)), pulse, a);
+        }
+    }
+    disc(&c, rx, ry, per_sec > 0 ? 4 : 2.5f, pulse, 255);
 
     // Big total
     char num[16];
@@ -95,17 +122,34 @@ static void draw(int per_sec, bool alert) {
 
     // Graph of frames per second
     int gx = 20, gy = 140, gw = FB_W - 40, gh = 56;
-    ui_round_rect(&c, gx - 4, gy - 4, gw + 8, gh + 8, 6.0f, PANEL);
+    ui_round_rect(&c, gx - 4, gy - 4, gw + 8, gh + 8, 7.0f, PANEL);
+    // Faint grid lines
+    for (int line = 1; line < 4; line++) {
+        int y = gy + gh * line / 4;
+        for (int x = 0; x < gw; x += 3) ui_blend(&c, gx + x, y, 0x3A2A55, 120);
+    }
     int bars = history_len < gw ? history_len : gw;
-    int bw = gw / (HISTORY);
+    int bw = gw / HISTORY;
     if (bw < 1) bw = 1;
     for (int i = 0; i < bars; i++) {
         int v = history[history_len - bars + i];
         int h = v * gh / 12; // 12/s fills the graph
         if (h > gh) h = gh;
-        uint32_t color = v >= ALERT_PER_SEC ? BAR_HOT : BAR_OK;
-        for (int x = 0; x < bw - 1; x++) {
-            for (int y = 0; y < h; y++) ui_blend(&c, gx + i * bw + x, gy + gh - 1 - y, color, 255);
+        if (h < 1 && v > 0) h = 1;
+        bool hot = v >= ALERT_PER_SEC;
+        uint32_t base = hot ? 0x5A0A14 : 0x3A1266;   // darker at the bottom
+        uint32_t top = hot ? BAR_HOT : 0xA23BF2;      // brighter at the top
+        for (int y = 0; y < h; y++) {
+            int f = h > 1 ? y * 255 / (h - 1) : 255;  // 0 bottom .. 255 top
+            int r = ((base >> 16 & 0xFF) * (255 - f) + (top >> 16 & 0xFF) * f) / 255;
+            int g = ((base >> 8 & 0xFF) * (255 - f) + (top >> 8 & 0xFF) * f) / 255;
+            int b = ((base & 0xFF) * (255 - f) + (top & 0xFF) * f) / 255;
+            uint32_t color = (r << 16) | (g << 8) | b;
+            for (int x = 0; x < bw - 1; x++) ui_blend(&c, gx + i * bw + x, gy + gh - 1 - y, color, 255);
+        }
+        // Bright cap on the top of the bar
+        if (h > 0) {
+            for (int x = 0; x < bw - 1; x++) ui_blend(&c, gx + i * bw + x, gy + gh - h, hot ? 0xFF9AA8 : 0xE6B3FF, 255);
         }
     }
 
@@ -139,7 +183,8 @@ void wifitools_deauth_detector(void) {
     int channel = 1;
     int64_t last_second = esp_timer_get_time();
     int per_sec = 0;
-    draw(0, false);
+    int frame = 0;
+    draw(0, false, 0);
 
     bool run = true;
     while (run) {
@@ -171,7 +216,7 @@ void wifitools_deauth_detector(void) {
             push_history(per_sec);
             if (per_sec >= ALERT_PER_SEC) sound_play(SOUND_ERROR);
         }
-        draw(per_sec, per_sec >= ALERT_PER_SEC);
+        draw(per_sec, per_sec >= ALERT_PER_SEC, ++frame);
     }
 
     // Leave monitor mode and reconnect to the saved network

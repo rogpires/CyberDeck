@@ -541,7 +541,7 @@ static const ShellCommand commands[] = {
     {"http",     "rede",  "<url>",                     "baixa uma pagina e mostra o texto",  cmd_http},
     {"myip",     "rede",  NULL,                        "ip publico e provedor",              cmd_myip},
     {"weather",  "rede",  "[cidade]",                  "previsao do tempo (wttr.in)",        cmd_weather},
-    {"deauth",   "radio", NULL,                        "detecta ataques de deauth no ar (passivo)", cmd_deauth},
+    {"deauth",   "rede",  NULL,                        "detecta ataques de deauth no ar (passivo)", cmd_deauth},
     {"blescan",  "radio", "[segundos]",                "dispositivos bluetooth por perto",   cmd_blescan},
 };
 
