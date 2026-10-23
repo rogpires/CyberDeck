@@ -4,6 +4,10 @@ Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 
 ## 2026-10-22
 
+### Plano de pinos para módulos
+- `docs/HARDWARE.md`: conectores livres (expansão IO2/3/14/21, UART IO43/44, I2C IO15/16) e onde ligar PN532, CC1101, RDM6300, LoRa e IR.
+- Telas de "precisa de módulo" corrigidas: RFID 125 kHz é RDM6300 (o RC522 é 13,56 MHz), com o conector de cada um.
+
 ### Botão de desligar, % da bateria e hora
 - **Botão ⏻** no canto superior esquerdo da home, com confirmação ("Cancelar" pré-selecionado). Depois aumentado para um botão de 46×32 px, com área de toque maior no topo (44 px), porque estava difícil de acertar.
 - Comando `touchtest`: mostra onde cada toque cai, para conferir a precisão do toque.

@@ -36,11 +36,11 @@ typedef struct {
 static const HomeItem home[] = {
     {"WiFi",     "wifi",      C_WIFI,   KIND_CATEGORY, "rede"},
     {"Bluetooth","bluetooth", C_BLE,    KIND_CATEGORY, "radio"},
-    {"SubGHz",   "subghz",    C_SUBGHZ, KIND_MODULE,   "CC1101 (433MHz)"},
-    {"NFC",      "nfc",       C_NFC,    KIND_MODULE,   "PN532"},
-    {"RFID",     "rfid",      C_RFID,   KIND_MODULE,   "RC522 (125kHz)"},
-    {"LoRa",     "lora",      C_LORA,   KIND_MODULE,   "SX1276"},
-    {"Infrared", "ir",        C_IR,     KIND_MODULE,   "LED/receptor IR"},
+    {"SubGHz",   "subghz",    C_SUBGHZ, KIND_MODULE,   "CC1101 na expansao"},
+    {"NFC",      "nfc",       C_NFC,    KIND_MODULE,   "PN532 no conector I2C"},
+    {"RFID",     "rfid",      C_RFID,   KIND_MODULE,   "RDM6300 (125 kHz) no IO43"},
+    {"LoRa",     "lora",      C_LORA,   KIND_MODULE,   "SX1276/SX1262 (SPI)"},
+    {"Infrared", "ir",        C_IR,     KIND_MODULE,   "LED IR + TSOP38238"},
     {"Arquivos", "folder",    C_PURPLE, KIND_CATEGORY, "arquivos"},
     {"Sistema",  "gear",      C_PURPLE, KIND_CATEGORY, "sistema"},
     {"Utils",    "apps",      C_PURPLE, KIND_CATEGORY, "utils"},
@@ -168,7 +168,7 @@ static void module_screen(const HomeItem* item) {
     term_printf("\x1b[1;35m%s\x1b[0m\r\n\r\n", item->label);
     term_puts("Esta ferramenta precisa de um\r\nmodulo de hardware que o deck\r\nnao tem embutido:\r\n\r\n");
     term_printf("  \x1b[1;33m%s\x1b[0m\r\n\r\n", item->data);
-    term_puts("\x1b[90mDa para ligar um nos pinos e eu\r\nimplemento o app depois.\x1b[0m\r\n");
+    term_puts("\x1b[90mPinos: docs/HARDWARE.md\x1b[0m\r\n");
     wait_to_return();
 }
 
