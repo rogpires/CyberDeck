@@ -2,6 +2,13 @@
 
 Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 
+## 2026-10-23
+
+### Desempenho da interface
+- Carrossel ~2x mais rápido: a camada estática (fundo, rótulo, bolinhas, status) virou cache em `bg`, redesenhada só quando muda; por quadro só os tiles se movem (composição 232 ms -> 120 ms).
+- Deslize com ease-out em menos passos (mais ágil) e glow do tile central menor (mais leve).
+- Tentativa de 80 MHz no SPI da tela revertida: trava o ILI9341 (boot loop); fica em 40 MHz.
+
 ## 2026-10-22
 
 ### Detector de deauth

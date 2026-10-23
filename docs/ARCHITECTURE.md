@@ -65,7 +65,9 @@ Mandar a tela inteira pela SPI (40 MHz) leva ~30 ms, e compor tudo mais algumas 
 |---|---|
 | Deslizando | quadro inteiro (`frame_full`) |
 | Parado, ícone flutuando | só um retângulo de 164×184 em volta do tile central, copiado de `base` (`frame_float` + `display_present_rect`) — e só quando o deslocamento muda 1 px |
-| A cada 2 s parado | quadro inteiro, para atualizar hora/bateria/Wi-Fi |
+| A cada 2 s parado | só reconstrói a camada estática em cache, depois um quadro |
+
+**Camada estática em cache:** fundo, rótulo, bolinhas, botão e ícones de status mudam devagar, então são desenhados uma vez em `bg` (com anti-serrilhado caro) e só refeitos quando o item selecionado muda ou o status atualiza. Cada quadro do deslize só copia `bg` e desenha os tiles em movimento — cortou a composição de ~232 ms para ~120 ms. O deslize também usa ease-out em menos passos (0,55), ficando mais ágil. O clock SPI da tela fica em 40 MHz: 80 MHz trava o ILI9341 (boot loop).
 
 ### Paleta (do TentacleOS, `ui_theme.c`)
 

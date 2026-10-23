@@ -99,6 +99,9 @@ static float rr_sdf(float dx, float dy, float half, float radius) {
     float qy = fabsf(dy) - (half - radius);
     if (qx < 0) qx = 0;
     if (qy < 0) qy = 0;
+    // sqrt only in the rounded corners; straight edges and the interior are exact without it
+    if (qx == 0) return qy - radius;
+    if (qy == 0) return qx - radius;
     return sqrtf(qx * qx + qy * qy) - radius;
 }
 
@@ -112,7 +115,7 @@ static void draw_tile(int cx, int cy, int size, uint32_t accent) {
     float half = size / 2.0f;
     float radius = size / 4.5f;
     int top = mixc(TILE_TOP, accent, 70), bottom = TILE_TOP;
-    const int glow = 28, shadow = 6;
+    const int glow = 18, shadow = 5;
 
     int reach = (int)half + glow + shadow + 2;
     for (int dy = -reach; dy <= reach; dy++) {
@@ -300,8 +303,55 @@ static int centre_item(const Items* items, float pos) {
     return nearest;
 }
 
-// Everything except the centre tile goes to `base`
+// Static layer (everything except the moving tiles): gradient, label, dots, back/power, status icons.
+// Cached in `bg` and rebuilt only when the selection changes or the status is due -- the expensive
+// anti-aliased status/label drawing must not run on every slide frame.
+static int bg_sel = -999;
+static int64_t bg_built_us;
+
+static void rebuild_static(const Items* items, int sel) {
+    build_background();     // gradient into bg
+    target = bg;
+    uint32_t accent = items->accents[sel];
+
+    char upper[24];
+    to_upper(items->labels[sel], upper, sizeof(upper));
+    const Font* label_font = &fonts[3]; // 12x24
+    int width = strlen(upper) * label_font->width;
+    draw_text((FB_W - width) / 2, LABEL_Y, upper, label_font, LABEL, true);
+    if (sel > 0) draw_text((FB_W - width) / 2 - 28, LABEL_Y + 3, "<", label_font, accent, false);
+    if (sel < items->count - 1) draw_text((FB_W + width) / 2 + 16, LABEL_Y + 3, ">", label_font, accent, false);
+
+    int dot_gap = 13;
+    int dots_x = (FB_W - (items->count - 1) * dot_gap) / 2;
+    for (int i = 0; i < items->count; i++) {
+        uint32_t color = i == sel ? accent : DOT_OFF;
+        int cx = dots_x + i * dot_gap, radius = i == sel ? 4 : 3;
+        for (int dy = -radius; dy <= radius; dy++) {
+            for (int dx = -radius; dx <= radius; dx++) {
+                float d = sqrtf(dx * dx + dy * dy) - radius;
+                if (d < 0.5f) blend(cx + dx, DOTS_Y + dy, color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF,
+                                    d < -0.5f ? 255 : (int)((0.5f - d) * 255));
+            }
+        }
+    }
+
+    Canvas canvas = {bg, FB_W, FB_H};
+    if (items->show_back) ui_back(&canvas, 6, 6, accent);
+    else ui_power_button(&canvas, 4, 4);
+    draw_status();
+
+    bg_sel = sel;
+    bg_built_us = esp_timer_get_time();
+}
+
+// Copies the cached static layer into `base`, then draws only the moving side tiles on top
 static void compose_base(const Items* items, float pos) {
+    int sel = (int)floorf(pos + 0.5f);
+    if (sel < 0) sel = 0;
+    if (sel >= items->count) sel = items->count - 1;
+    if (sel != bg_sel || esp_timer_get_time() - bg_built_us > STATUS_MS * 1000LL) rebuild_static(items, sel);
+
     memcpy(base, bg, FB_W * FB_H * sizeof(uint16_t));
     target = base;
 
@@ -334,43 +384,6 @@ static void compose_base(const Items* items, float pos) {
         tmp_icon(size, items->icon_index[order[i].index], bright);
         warp_blit(size, layout_x(offset), TILE_CY, offset);
     }
-
-    // Label, arrows, dots
-    int sel = (int)floorf(pos + 0.5f);
-    if (sel < 0) sel = 0;
-    if (sel >= items->count) sel = items->count - 1;
-    uint32_t accent = items->accents[sel];
-    char upper[24];
-    to_upper(items->labels[sel], upper, sizeof(upper));
-    const Font* label_font = &fonts[3]; // 12x24
-    int width = strlen(upper) * label_font->width;
-    draw_text((FB_W - width) / 2, LABEL_Y, upper, label_font, LABEL, true);
-    if (sel > 0) draw_text((FB_W - width) / 2 - 28, LABEL_Y + 3, "<", label_font, accent, false);
-    if (sel < items->count - 1) draw_text((FB_W + width) / 2 + 16, LABEL_Y + 3, ">", label_font, accent, false);
-
-    int dot_gap = 13;
-    int dots_x = (FB_W - (items->count - 1) * dot_gap) / 2;
-    for (int i = 0; i < items->count; i++) {
-        uint32_t color = i == sel ? accent : DOT_OFF;
-        int cx = dots_x + i * dot_gap, radius = i == sel ? 4 : 3;
-        for (int dy = -radius; dy <= radius; dy++) {
-            for (int dx = -radius; dx <= radius; dx++) {
-                float d = sqrtf(dx * dx + dy * dy) - radius;
-                if (d < 0.5f) blend(cx + dx, DOTS_Y + dy, color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF,
-                                    d < -0.5f ? 255 : (int)((0.5f - d) * 255));
-            }
-        }
-    }
-
-    Canvas canvas = {target, FB_W, FB_H};
-    if (items->show_back) {
-        // Same place as the header's "< MENU" on every other screen
-        ui_back(&canvas, 6, 6, accent);
-    } else {
-        // The home screen has nothing to go back to: the corner is the off button
-        ui_power_button(&canvas, 4, 4);
-    }
-    draw_status();
 }
 
 static void draw_centre(const Items* items, float pos, float pop, int float_dy) {
@@ -511,7 +524,7 @@ int carousel_run(const char* const* labels, const int* icon_index, const uint32_
         base = heap_caps_malloc(FB_W * FB_H * sizeof(uint16_t), MALLOC_CAP_SPIRAM);
         bg = heap_caps_malloc(FB_W * FB_H * sizeof(uint16_t), MALLOC_CAP_SPIRAM);
         tile_tmp = heap_caps_malloc(MAXTILE * MAXTILE * sizeof(uint32_t), MALLOC_CAP_SPIRAM);
-        build_background();
+        if (fb == NULL || base == NULL || bg == NULL || tile_tmp == NULL) return -1; // out of memory
     }
     Items items = {labels, icon_index, accents, count, show_back};
     int target_index = start < 0 || start >= count ? 0 : start;
@@ -520,6 +533,7 @@ int carousel_run(const char* const* labels, const int* icon_index, const uint32_
     term_pause(true);
     term_hide_bar(true);
     touch_set_header_enabled(false); // no keyboard button on this screen
+    bg_sel = -999; // rebuild the cached static layer (clock/battery may have changed since last time)
     int float_dy = float_offset();
     frame_full(&items, pos, 1.0f, float_dy);
     int64_t last_status = esp_timer_get_time();
@@ -571,9 +585,9 @@ int carousel_run(const char* const* labels, const int* icon_index, const uint32_
             sound_play(SOUND_SELECT);
             target_index = chosen;
             // Finish the slide, then the pop
-            while (fabsf(pos - chosen) > 0.01f) {
-                pos += (chosen - pos) * 0.4f;
-                if (fabsf(pos - chosen) <= 0.01f) pos = chosen;
+            while (fabsf(pos - chosen) > 0.04f) {
+                pos += (chosen - pos) * 0.55f;
+                if (fabsf(pos - chosen) <= 0.04f) pos = chosen;
                 frame_full(&items, pos, 1.0f, float_dy);
             }
             static const float pop[] = {1.06f, 1.12f, 1.16f, 1.12f, 1.05f, 1.0f};
@@ -582,14 +596,15 @@ int carousel_run(const char* const* labels, const int* icon_index, const uint32_
             break;
         }
 
-        if (fabsf(pos - target_index) > 0.01f) {
-            // Sliding: every frame changes everything
-            pos += (target_index - pos) * 0.35f;
-            if (fabsf(pos - target_index) <= 0.01f) pos = target_index;
+        if (fabsf(pos - target_index) > 0.04f) {
+            // Sliding: ease-out in a few quick frames
+            pos += (target_index - pos) * 0.55f;
+            if (fabsf(pos - target_index) <= 0.04f) pos = target_index;
             frame_full(&items, pos, 1.0f, float_dy);
             last_status = esp_timer_get_time();
         } else if (esp_timer_get_time() - last_status > STATUS_MS * 1000LL) {
-            // Clock, battery and connection icons
+            // Clock, battery and connection icons: rebuild the cached layer, then one frame
+            bg_sel = -999;
             frame_full(&items, pos, 1.0f, float_dy);
             last_status = esp_timer_get_time();
         } else {
