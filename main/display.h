@@ -9,6 +9,9 @@
 void display_init(void);
 // Backlight off (held through deep sleep) and the panel in sleep mode, for power_off()
 void display_sleep(void);
+// Backlight brightness 5..100 %, saved
+void display_set_brightness(int percent);
+int display_brightness(void);
 
 // Blocks until the transfer is done, so the buffer can be reused right away.
 // Pixels are RGB565 in panel byte order (see display_color()).

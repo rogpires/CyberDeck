@@ -8,6 +8,7 @@
 #include "input.h"
 #include "badusb.h"
 #include "osk.h"
+#include "settings.h"
 #include "shell.h"
 #include "term.h"
 
@@ -23,7 +24,7 @@
 #define C_LORA   0x00BCD4
 #define C_PURPLE 0xBF00FF
 
-typedef enum { KIND_CATEGORY, KIND_TERMINAL, KIND_MODULE, KIND_BADUSB } Kind;
+typedef enum { KIND_CATEGORY, KIND_TERMINAL, KIND_MODULE, KIND_BADUSB, KIND_SETTINGS } Kind;
 
 typedef struct {
     const char* label;
@@ -44,7 +45,8 @@ static const HomeItem home[] = {
     {"Infrared", "ir",        C_IR,     KIND_MODULE,   "LED IR + TSOP38238"},
     {"Bad USB",  "usb",       C_PURPLE, KIND_BADUSB,   NULL},
     {"Arquivos", "folder",    C_PURPLE, KIND_CATEGORY, "arquivos"},
-    {"Sistema",  "gear",      C_PURPLE, KIND_CATEGORY, "sistema"},
+    {"Ajustes",  "gear",      C_PURPLE, KIND_SETTINGS, NULL},
+    {"Sistema",  "chip",      C_PURPLE, KIND_CATEGORY, "sistema"},
     {"Utils",    "apps",      C_PURPLE, KIND_CATEGORY, "utils"},
     {"Terminal", "apps",      C_PURPLE, KIND_TERMINAL, NULL},
 };
@@ -200,6 +202,9 @@ void menu_open(void) {
                 break;
             case KIND_BADUSB:
                 badusb_browse();
+                break;
+            case KIND_SETTINGS:
+                settings_open();
                 break;
             case KIND_CATEGORY:
                 category_menu(item->data, item->icon, item->accent);

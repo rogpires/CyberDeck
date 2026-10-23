@@ -4,6 +4,11 @@ Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 
 ## 2026-10-22
 
+### Tela de Ajustes
+- Item **Ajustes** (⚙) no menu: brilho, volume, tempo de auto-off e fonte numa lista tocável, tudo salvo.
+- **Brilho** agora por PWM (antes o backlight era só on/off).
+- O auto-off deixou de ser constante no codigo e passou a ser escolhido aqui. "Sistema" ganhou o icone de chip.
+
 ### Bad USB
 - Teclado USB (TinyUSB HID) + interpretador de DuckyScript lendo de `/sd/badusb/*.txt`.
 - Item **Bad USB** no menu; lista, previa e confirmacao obrigatoria antes de injetar; exemplo inofensivo criado no primeiro uso.

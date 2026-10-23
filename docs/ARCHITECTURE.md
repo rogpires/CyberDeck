@@ -18,6 +18,7 @@ Firmware ESP-IDF v6.1 em C, sem LVGL: tudo é desenhado à mão. Código em `mai
 | `wifi.c` | Estação Wi-Fi, credenciais salvas pelo driver, reconexão |
 | `statusbar.c` | Bateria (ADC, média, detecção de carregador) e relógio (SNTP, horário de Brasília) |
 | `badusb.c` + `badusb_hid.c` | Bad USB: teclado USB (TinyUSB) e interpretador de DuckyScript |
+| `settings.c` | Tela de Ajustes: brilho, volume, auto-off, fonte (lista tocável, tudo salvo na NVS) |
 | `power.c` | Desligar (deep sleep), acordar por toque ou BOOT, desligamento automático por inatividade |
 | `storage.c` | Monta o microSD em `/sd` |
 | `shell.c` | Shell: registro de comandos por módulo, edição de linha, histórico, paginador, diretório atual |
@@ -115,6 +116,8 @@ A saída do terminal também é espelhada na serial USB, então o deck pode ser 
 
 **Botão na home:** o canto superior esquerdo da home (onde as outras telas têm "◀ MENU") é o botão ⏻, um botão de 46×32 px com área de toque de 80×44 px (a borda de cima do painel é a menos precisa); toque nele ou Esc abre "Desligar o deck?" com **Cancelar** pré-selecionado, para um Enter ou toque acidental não desligar.
 
+O tempo de auto-off é escolhido em **Ajustes** (nunca a 60 min), não é fixo no código.
+
 **Automático:** qualquer evento de entrada ou saída no terminal conta como uso (`power_activity`). Uma tarefa verifica a cada 5 s; padrão 5 min, salvo na NVS (`autooff`).
 
 Testado: depois de `desligar`, a USB some e não volta sozinha (não há ciclo de acordar).
@@ -132,6 +135,19 @@ Enquanto carrega, 100 mV são descontados para a porcentagem não pular para 100
 ## Relógio
 
 SNTP (`pool.ntp.org`, horário de Brasília). O primeiro pedido só sai quando o Wi-Fi recebe IP, e uma tarefa repete o pedido a cada 3 s até a hora chegar: o primeiro pacote logo após conectar costuma se perder, e o SNTP sozinho esperaria 15 s, 30 s... Sem o atraso aleatório de início (`CONFIG_LWIP_SNTP_STARTUP_DELAY=n`). A hora aparece ~15–20 s após ligar e se mantém durante o deep sleep.
+
+## Ajustes
+
+Tela própria (`settings.c`), aberta pelo item ⚙ do menu. Uma lista de opções, cada uma com `-`/`+` (toque) ou ←/→ (teclado), ↑/↓ troca de linha, ◀ MENU volta:
+
+| Opção | Valores | Guardado em |
+|---|---|---|
+| Brilho | 5–100 % (PWM no backlight, LEDC) | `bright` |
+| Volume | mudo, 10–100 % | `volume` |
+| Desligar sozinho | nunca, 1, 2, 5, 10, 15, 30, 60 min | `autooff` |
+| Fonte | 5x8, 6x12, 8x16, 12x24 | `font` |
+
+O brilho virou PWM (antes o backlight era só liga/desliga): timer/canal LEDC próprios no GPIO45; no deep sleep o canal para em nível baixo e o pino é preso, como antes.
 
 ## Som
 

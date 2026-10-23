@@ -60,6 +60,8 @@ Teclado físico no terminal: **↑/↓** histórico, **Ctrl+C** interrompe, **Ct
 
 Wi-Fi: `wifi connect "MinhaRede" senha` (fica salvo).
 
+**Ajustes:** no menu, *Ajustes* (⚙) abre a tela de configurações: **brilho**, **volume**, **tempo para desligar sozinho** (nunca a 60 min) e **tamanho da fonte**. Setas mudam, ou toque no `-`/`+` de cada linha. Tudo fica salvo.
+
 **Ligar e desligar (na bateria):** o botão **⏻** no canto superior esquerdo da home (ou Esc na home) abre a confirmação; *Sistema → desligar* também. Desligar apaga a tela, desliga som e rádio e põe o ESP32-S3 em deep sleep. **Tocar na tela** ou apertar **BOOT** liga de novo (RESET também). Sem uso por 5 min ele desliga sozinho; mude com `autooff <minutos>` (`0` = nunca). Para guardar por muito tempo, uma chave no fio da bateria corta o consumo de vez (ver [HARDWARE](docs/HARDWARE.md)).
 
 **Status no topo:** Bluetooth, Wi-Fi (força do sinal), bateria com a **porcentagem** e hora (sincronizada pela internet; aparece uns 15–20 s depois de ligar com Wi-Fi).

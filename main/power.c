@@ -17,7 +17,7 @@
 
 #define PIN_BOOT_BUTTON 0
 #define PIN_TOUCH_INT   17
-#define DEFAULT_AUTOOFF 15  // minutes
+#define DEFAULT_AUTOOFF 5   // minutes (changeable in Ajustes)
 
 static const char* TAG = "power";
 static volatile int64_t last_activity_us;
