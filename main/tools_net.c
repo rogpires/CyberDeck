@@ -26,6 +26,7 @@
 #include "sound.h"
 #include "term.h"
 #include "wifi.h"
+#include "wifitools.h"
 
 #define PING_ID 0xDEC0
 
@@ -528,6 +529,10 @@ static void cmd_blescan(int argc, char** argv) {
     ble_devices = NULL;
 }
 
+static void cmd_deauth(int argc, char** argv) {
+    wifitools_deauth_detector();
+}
+
 static const ShellCommand commands[] = {
     {"ping",     "rede",  "<host> [vezes, 0=sem fim]", "testa se um host responde",          cmd_ping},
     {"netscan",  "rede",  NULL,                        "lista os dispositivos da sua rede",  cmd_netscan},
@@ -536,6 +541,7 @@ static const ShellCommand commands[] = {
     {"http",     "rede",  "<url>",                     "baixa uma pagina e mostra o texto",  cmd_http},
     {"myip",     "rede",  NULL,                        "ip publico e provedor",              cmd_myip},
     {"weather",  "rede",  "[cidade]",                  "previsao do tempo (wttr.in)",        cmd_weather},
+    {"deauth",   "radio", NULL,                        "detecta ataques de deauth no ar (passivo)", cmd_deauth},
     {"blescan",  "radio", "[segundos]",                "dispositivos bluetooth por perto",   cmd_blescan},
 };
 

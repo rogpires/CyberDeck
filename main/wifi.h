@@ -15,3 +15,5 @@ bool wifi_is_connected(void);
 esp_netif_t* wifi_netif(void);
 // Signal of the current network in dBm, 0 when disconnected
 int wifi_rssi(void);
+// Reconnects to the saved network after monitor mode
+void wifi_reconnect(void);

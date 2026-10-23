@@ -4,6 +4,10 @@ Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 
 ## 2026-10-22
 
+### Detector de deauth
+- Ferramenta passiva de Wi-Fi: escuta o ar em modo monitor e mostra ataques de deauth/disassoc ao vivo (total, taxa, gráfico, canal, origem, alerta). Comando `deauth`, na categoria WiFi.
+- Foi a alternativa defensiva ao pedido de um deauther: o deck detecta o ataque, não o executa.
+
 ### Tela de Ajustes
 - Item **Ajustes** (⚙) no menu: brilho, volume, tempo de auto-off e fonte numa lista tocável, tudo salvo.
 - **Brilho** agora por PWM (antes o backlight era só on/off).

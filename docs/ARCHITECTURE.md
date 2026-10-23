@@ -18,6 +18,7 @@ Firmware ESP-IDF v6.1 em C, sem LVGL: tudo é desenhado à mão. Código em `mai
 | `wifi.c` | Estação Wi-Fi, credenciais salvas pelo driver, reconexão |
 | `statusbar.c` | Bateria (ADC, média, detecção de carregador) e relógio (SNTP, horário de Brasília) |
 | `badusb.c` + `badusb_hid.c` | Bad USB: teclado USB (TinyUSB) e interpretador de DuckyScript |
+| `wifitools.c` | Ferramentas de Wi-Fi passivas (modo monitor). Detector de deauth |
 | `settings.c` | Tela de Ajustes: brilho, volume, auto-off, fonte (lista tocável, tudo salvo na NVS) |
 | `power.c` | Desligar (deep sleep), acordar por toque ou BOOT, desligamento automático por inatividade |
 | `storage.c` | Monta o microSD em `/sd` |
@@ -170,6 +171,10 @@ Mesma abordagem do TentacleOS (`ui_feedback.c`): tons senoidais curtos gerados n
 | OFF | 784/120, 659/120, 523/175 | ao desligar (nosso: o boot ao contrário) |
 | PLUG | 1046/45, 1568/55, 2093/80 | carregador conectado (TentacleOS: SD inserido) |
 | UNPLUG | 2093/45, 1568/55, 1046/80 | carregador removido (TentacleOS: SD removido) |
+
+## Detector de deauth
+
+Escuta passiva em modo promíscuo (`esp_wifi_set_promiscuous`), filtro só de management frames. O callback conta os subtipos **0x0C (deauth)** e **0x0A (disassoc)** — o byte de frame control é `0xC0`/`0xA0` — e guarda a origem (addr2). O painel pula pelos canais 1–13 a cada 280 ms, agrega por segundo num gráfico de 48 s e alerta acima de 5/s. **Não transmite**: por escolha, o deck detecta o ataque, não o executa. Ao sair, `wifi_reconnect()` volta para a rede salva.
 
 ## Bad USB
 

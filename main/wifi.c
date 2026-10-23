@@ -132,3 +132,12 @@ int wifi_rssi(void) {
     if (!connected || esp_wifi_sta_get_ap_info(&ap) != ESP_OK) return 0;
     return ap.rssi;
 }
+
+// Returns from monitor mode: reconnect to the saved network if there is one
+void wifi_reconnect(void) {
+    wifi_config_t config;
+    if (esp_wifi_get_config(WIFI_IF_STA, &config) == ESP_OK && config.sta.ssid[0] != 0) {
+        wanted = true;
+        esp_wifi_connect();
+    }
+}

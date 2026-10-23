@@ -52,7 +52,7 @@ Quando uma ferramenta pede argumentos (ex.: o IP do `ping`), o teclado na tela a
 |---|---|
 | sistema | `menu` `sysinfo` `date` `uptime` `mem` `wifi` `bt` `font` `volume` `bateria` `desligar` `autooff` `touchtest` `reboot` |
 | rede | `ping` `netscan` `portscan` `dns` `http` `myip` `weather` |
-| rádio | `blescan`, `wifi scan` |
+| rádio | `blescan`, `wifi scan`, `deauth` (detector) |
 | arquivos | `ls` `cd` `pwd` `cat` `hexdump` `write` `touch` `mkdir` `rm` `mv` `df` |
 | utils | `calc` `passgen` `sha256` `base64` `matrix` |
 
@@ -69,6 +69,10 @@ Wi-Fi: `wifi connect "MinhaRede" senha` (fica salvo).
 **Carregando:** com o cabo USB-C ligado, aparece um raio no ícone da bateria (amarelo carregando, branco cheia) e toca um som ao plugar/desplugar. `bateria` mostra a carga, a tensão e o estado.
 
 **Sons** (alto-falante da placa, mesmos tons do TentacleOS): acorde ao ligar, clique ao navegar e ao teclar no teclado na tela, tom de seleção, sinal de "achou algo" ao fim dos scans, de "gravado" ao salvar arquivo, e de erro. `volume 0` silencia; o volume fica salvo.
+
+## Detector de deauth
+
+No menu (categoria WiFi) ou pelo comando `deauth`: a placa entra em modo monitor (escuta passiva, **não transmite nada**) e mostra ao vivo os quadros de *deauthentication/disassociation* no ar — total, taxa por segundo num gráfico, canal e a origem — com alerta quando há um ataque em andamento. Serve para **aprender e detectar** o ataque pelo lado da defesa. Ao sair, reconecta no Wi-Fi salvo.
 
 ## Bad USB
 
