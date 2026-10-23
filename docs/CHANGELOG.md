@@ -5,6 +5,9 @@ Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 ## 2026-10-22
 
 ### Detector de deauth
+- Painel repaginado (barras com degradê, grade, radar pulsante) e movido para a categoria **WiFi**.
+- Linha "ouvindo o ar: N quadros" confirma que o radio capta (zero deauth = sem ataque, nao e falha).
+- Corrigido: a reconexao automatica do Wi-Fi brigava com o modo monitor (`wifi_suspend`).
 - Ferramenta passiva de Wi-Fi: escuta o ar em modo monitor e mostra ataques de deauth/disassoc ao vivo (total, taxa, gráfico, canal, origem, alerta). Comando `deauth`, na categoria WiFi.
 - Foi a alternativa defensiva ao pedido de um deauther: o deck detecta o ataque, não o executa.
 

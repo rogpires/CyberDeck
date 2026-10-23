@@ -133,6 +133,12 @@ int wifi_rssi(void) {
     return ap.rssi;
 }
 
+// Stops Wi-Fi activity for monitor mode: the auto-reconnect handler must not fight the channel hopping
+void wifi_suspend(void) {
+    wanted = false;
+    esp_wifi_disconnect();
+}
+
 // Returns from monitor mode: reconnect to the saved network if there is one
 void wifi_reconnect(void) {
     wifi_config_t config;

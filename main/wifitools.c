@@ -39,12 +39,14 @@ static volatile uint32_t total_count;
 static volatile uint32_t second_count;
 static volatile uint8_t last_source[6];
 static volatile uint8_t last_channel;
+static volatile uint32_t mgmt_total;  // all management frames: proof the radio is listening
 
 static void sniffer_cb(void* buf, wifi_promiscuous_pkt_type_t type) {
     if (type != WIFI_PKT_MGMT) return;
     const wifi_promiscuous_pkt_t* pkt = buf;
     const uint8_t* p = pkt->payload;
     uint8_t frame_control = p[0];
+    mgmt_total++;
     // Management frame, subtype 0x0C = deauthentication, 0x0A = disassociation
     if (frame_control == 0xC0 || frame_control == 0xA0) {
         total_count++;
@@ -112,12 +114,19 @@ static void draw(int per_sec, bool alert, int frame) {
     snprintf(line, sizeof(line), "agora: %d/s   canal %d", per_sec, last_channel ? last_channel : 1);
     ui_text(&c, 20, 98, line, &fonts[2], alert ? DANGER : OK, false);
 
-    // Source of the last frame
+    // Proof the radio is capturing: beacons/probes are everywhere even with no attack
+    char heard[40];
+    uint32_t seen = mgmt_total;
+    if (seen > 0) snprintf(heard, sizeof(heard), "ouvindo o ar: %lu quadros", (unsigned long)seen);
+    else snprintf(heard, sizeof(heard), "sem captura (radio?)");
+    ui_text(&c, 20, 116, heard, &fonts[1], seen > 0 ? OK : DANGER, false);
+
+    // Source of the last deauth frame
     if (total_count > 0) {
         char mac[40];
         snprintf(mac, sizeof(mac), "origem %02x:%02x:%02x:%02x:%02x:%02x",
                  last_source[0], last_source[1], last_source[2], last_source[3], last_source[4], last_source[5]);
-        ui_text(&c, 20, 116, mac, &fonts[1], DIM, false);
+        ui_text(&c, 20, 127, mac, &fonts[1], DIM, false);
     }
 
     // Graph of frames per second
@@ -165,13 +174,13 @@ static void draw(int per_sec, bool alert, int frame) {
 
 void wifitools_deauth_detector(void) {
     if (fb == NULL) fb = heap_caps_malloc(FB_W * FB_H * sizeof(uint16_t), MALLOC_CAP_SPIRAM);
-    total_count = second_count = 0;
+    total_count = second_count = mgmt_total = 0;
     last_channel = 0;
     history_len = 0;
     memset(history, 0, sizeof(history));
 
-    // Enter monitor mode: drop the STA link and listen, hopping channels
-    esp_wifi_disconnect();
+    // Enter monitor mode: suspend the STA link (and its auto-reconnect) and listen, hopping channels
+    wifi_suspend();
     wifi_promiscuous_filter_t filter = {.filter_mask = WIFI_PROMIS_FILTER_MASK_MGMT};
     esp_wifi_set_promiscuous_filter(&filter);
     esp_wifi_set_promiscuous_rx_cb(sniffer_cb);
