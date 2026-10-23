@@ -1,0 +1,17 @@
+#pragma once
+
+#include <stdbool.h>
+
+#include "esp_netif.h"
+
+// Connects to the saved network (if any) and keeps reconnecting
+void wifi_init(void);
+void wifi_connect(const char* ssid, const char* password);
+void wifi_disconnect(void);
+// Prints the networks in range to the terminal
+void wifi_scan(void);
+void wifi_print_status(void);
+bool wifi_is_connected(void);
+esp_netif_t* wifi_netif(void);
+// Signal of the current network in dBm, 0 when disconnected
+int wifi_rssi(void);
