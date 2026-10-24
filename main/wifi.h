@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "esp_netif.h"
+#include "esp_wifi.h"
 
 // Connects to the saved network (if any) and keeps reconnecting
 void wifi_init(void);
@@ -12,6 +13,10 @@ void wifi_disconnect(void);
 void wifi_scan(void);
 void wifi_print_status(void);
 bool wifi_is_connected(void);
+// Scans; fills out[] with up to max networks, returns the count
+int wifi_scan_list(wifi_ap_record_t* out, int max);
+// Current/saved SSID; false if none
+bool wifi_current_ssid(char* out, int size);
 esp_netif_t* wifi_netif(void);
 // Signal of the current network in dBm, 0 when disconnected
 int wifi_rssi(void);

@@ -533,7 +533,12 @@ static void cmd_deauth(int argc, char** argv) {
     wifitools_deauth_detector();
 }
 
+static void cmd_wifi_connect_ui(int argc, char** argv) {
+    wifitools_connect_screen();
+}
+
 static const ShellCommand commands[] = {
+    {"conectar", "rede", NULL,                        "conecta numa rede wifi (toque)",     cmd_wifi_connect_ui},
     {"ping",     "rede",  "<host> [vezes, 0=sem fim]", "testa se um host responde",          cmd_ping},
     {"netscan",  "rede",  NULL,                        "lista os dispositivos da sua rede",  cmd_netscan},
     {"portscan", "rede",  "<host> [porta|ini-fim]",    "portas tcp abertas (sem porta: comuns)", cmd_portscan},

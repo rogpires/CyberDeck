@@ -2,6 +2,11 @@
 
 Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 
+## 2026-10-24
+
+### Conectar no Wi-Fi pela tela
+- Tela de conexão (WiFi -> conectar): procura redes, lista com sinal e cadeado, toque na rede, senha pelo teclado da tela. Essencial para usar o deck fora de casa; antes só dava pelo comando no terminal.
+
 ## 2026-10-23
 
 ### Desempenho da interface

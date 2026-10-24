@@ -102,6 +102,25 @@ void wifi_scan(void) {
     sound_play(count ? SOUND_READ : SOUND_ERROR);
 }
 
+// Scans and fills `out` with up to `max` networks (strongest first, as the driver returns). Returns the count.
+int wifi_scan_list(wifi_ap_record_t* out, int max) {
+    if (esp_wifi_scan_start(NULL, true) != ESP_OK) return 0;
+    uint16_t count = max;
+    if (esp_wifi_scan_get_ap_records(&count, out) != ESP_OK) return 0;
+    return count;
+}
+
+// True while a connection attempt is in progress or connected to `ssid`
+bool wifi_current_ssid(char* out, int size) {
+    wifi_config_t config;
+    if (esp_wifi_get_config(WIFI_IF_STA, &config) != ESP_OK || config.sta.ssid[0] == 0) {
+        if (size) out[0] = 0;
+        return false;
+    }
+    strlcpy(out, (const char*)config.sta.ssid, size);
+    return true;
+}
+
 void wifi_print_status(void) {
     wifi_config_t config;
     esp_wifi_get_config(WIFI_IF_STA, &config);

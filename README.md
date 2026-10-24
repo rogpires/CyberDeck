@@ -58,7 +58,7 @@ Quando uma ferramenta pede argumentos (ex.: o IP do `ping`), o teclado na tela a
 
 Teclado físico no terminal: **↑/↓** histórico, **Ctrl+C** interrompe, **Ctrl+L** limpa.
 
-Wi-Fi: `wifi connect "MinhaRede" senha` (fica salvo).
+**Conectar no Wi-Fi (sem teclado físico):** no menu, **WiFi -> conectar**: ele procura as redes, mostra a lista com sinal e cadeado, você toca na sua, digita a senha no teclado da tela e pronto. Fica salvo e reconecta sozinho. (No terminal ainda dá: `wifi connect "MinhaRede" senha`.)
 
 **Ajustes:** no menu, *Ajustes* (⚙) abre a tela de configurações: **brilho**, **volume**, **tempo para desligar sozinho** (nunca a 60 min) e **tamanho da fonte**. Setas mudam, ou toque no `-`/`+` de cada linha. Tudo fica salvo.
 

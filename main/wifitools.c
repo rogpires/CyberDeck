@@ -235,3 +235,169 @@ void wifitools_deauth_detector(void) {
     term_pause(false);
     wifi_reconnect();
 }
+
+// Wi-Fi connect screen: scan, pick a network, type the password on-screen, connect.
+
+#include "osk.h"
+
+#define WSCAN_MAX 20
+
+static uint16_t* wfb;
+
+static int wifi_bars(int rssi) {
+    return rssi > -60 ? 3 : (rssi > -72 ? 2 : (rssi > -82 ? 1 : 0));
+}
+
+// Signal bars icon at (x,y) in a 16x12 box
+static void draw_bars(Canvas* c, int x, int y, int bars, uint32_t color) {
+    for (int i = 0; i < 3; i++) {
+        int h = 4 + i * 4, bx = x + i * 5;
+        uint32_t col = i < bars ? color : 0x3A2A55;
+        for (int dy = 0; dy < h; dy++) {
+            for (int dx = 0; dx < 4; dx++) ui_blend(c, bx + dx, y + 12 - dy, col, 255);
+        }
+    }
+}
+
+// A small padlock at (x,y): body plus a shackle (two verticals and a top)
+static void draw_lock(Canvas* c, int x, int y, uint32_t color) {
+    ui_round_rect(c, x, y + 5, 10, 7, 2.0f, color);
+    for (int dy = 0; dy < 5; dy++) {
+        ui_blend(c, x + 2, y + dy, color, 255);
+        ui_blend(c, x + 7, y + dy, color, 255);
+    }
+    for (int dx = 2; dx <= 7; dx++) ui_blend(c, x + dx, y, color, 255);
+}
+
+static bool password_prompt(const char* ssid, char* out, int size) {
+    Canvas c = {wfb, FB_W, FB_H};
+    osk_show();
+    int len = 0;
+    out[0] = 0;
+    while (true) {
+        ui_fill(&c, BG);
+        ui_back(&c, 6, 2, ACCENT);
+        ui_text(&c, 20, 22, "SENHA", &fonts[3], LABEL, false);
+        ui_text(&c, 20, 50, ssid, &fonts[2], ACCENT, false);
+        // Password box (masked)
+        ui_round_rect(&c, 18, 74, FB_W - 36, 24, 5.0f, 0x1A1028);
+        char masked[40];
+        int n = len < 36 ? len : 36;
+        for (int i = 0; i < n; i++) masked[i] = '*';
+        masked[n] = 0;
+        ui_text(&c, 26, 79, masked, &fonts[2], LABEL, false);
+        ui_text(&c, 20, 104, "digite a senha e ENTER", &fonts[1], DIM, false);
+        display_present(0, DISPLAY_HEIGHT - OSK_H, wfb); // keep the keyboard area intact
+
+        InputEvent e;
+        input_wait(&e, UINT32_MAX);
+        if (e.type == EV_BACK) { osk_hide(); return false; }
+        if (e.type != EV_KEY) continue;
+        char ch = e.key;
+        if (ch == '\r' || ch == '\n') { osk_hide(); return true; }
+        if (ch == 0x1b) { osk_hide(); return false; }
+        if (ch == 0x7f || ch == '\b') { if (len > 0) out[--len] = 0; }
+        else if ((unsigned char)ch >= 0x20 && len < size - 1) { out[len++] = ch; out[len] = 0; }
+    }
+}
+
+void wifitools_connect_screen(void) {
+    if (wfb == NULL) wfb = heap_caps_malloc(FB_W * DISPLAY_HEIGHT * sizeof(uint16_t), MALLOC_CAP_SPIRAM);
+    wifi_ap_record_t* aps = heap_caps_malloc(WSCAN_MAX * sizeof(wifi_ap_record_t), MALLOC_CAP_SPIRAM);
+    if (wfb == NULL || aps == NULL) { free(aps); return; }
+
+    term_pause(true);
+    term_hide_bar(true);
+
+    int selected = 0, top = 0, count = 0;
+    bool scanning = true;
+    char status[64] = "";
+
+    while (true) {
+        Canvas c = {wfb, FB_W, DISPLAY_HEIGHT};
+        ui_fill(&c, BG);
+        ui_back(&c, 6, 2, ACCENT);
+        ui_text(&c, 20, 20, "WIFI", &fonts[3], LABEL, false);
+
+        if (scanning) {
+            ui_text(&c, 20, 60, "procurando redes...", &fonts[2], DIM, false);
+            display_present(0, DISPLAY_HEIGHT, wfb);
+            count = wifi_scan_list(aps, WSCAN_MAX);
+            scanning = false;
+            selected = 0; top = 0;
+            continue;
+        }
+
+        int row_h = 30, list_top = 44, rows = (DISPLAY_HEIGHT - list_top - 20) / row_h;
+        if (selected < top) top = selected;
+        if (selected >= top + rows) top = selected - rows + 1;
+        for (int i = 0; i < rows && top + i < count; i++) {
+            int idx = top + i, y = list_top + i * row_h;
+            bool sel = idx == selected;
+            ui_round_rect(&c, 10, y, FB_W - 20, row_h - 4, 7.0f, sel ? 0x3A1C66 : 0x16002A);
+            draw_bars(&c, 20, y + 6, wifi_bars(aps[idx].rssi), sel ? 0xFFFFFF : OK);
+            bool secured = aps[idx].authmode != WIFI_AUTH_OPEN;
+            if (secured) draw_lock(&c, 44, y + 6, sel ? 0xFFFFFF : DIM);
+            const char* ssid = aps[idx].ssid[0] ? (const char*)aps[idx].ssid : "(oculta)";
+            ui_text(&c, 62, y + 7, ssid, &fonts[2], sel ? LABEL : 0xCFC6E0, false);
+        }
+        if (count == 0) ui_text(&c, 20, 60, "nenhuma rede encontrada", &fonts[2], DIM, false);
+        if (status[0]) ui_text(&c, 14, DISPLAY_HEIGHT - 16, status, &fonts[1], ACCENT, false);
+        else ui_text(&c, 14, DISPLAY_HEIGHT - 16, "toque numa rede   -   R procura de novo", &fonts[1], DIM, false);
+        display_present(0, DISPLAY_HEIGHT, wfb);
+
+        InputEvent e;
+        input_wait(&e, UINT32_MAX);
+        int chosen = -1;
+        if (e.type == EV_BACK) break;
+        else if (e.type == EV_TAP) {
+            if (e.y >= list_top) {
+                int idx = top + (e.y - list_top) / row_h;
+                if (idx >= 0 && idx < count) { selected = idx; chosen = idx; }
+            }
+        } else if (e.type == EV_KEY) {
+            char ch = e.key;
+            if (ch == 0x1b) {
+                char nx;
+                if (!input_read(&nx, 30)) break;
+                if (nx == '[' || nx == 'O') {
+                    char code; if (input_read(&code, 30)) {
+                        if (code == 'A' && selected > 0) selected--;
+                        if (code == 'B' && selected < count - 1) selected++;
+                    }
+                }
+            } else if (ch == '\r' || ch == '\n') chosen = selected;
+            else if (ch == 'r' || ch == 'R') scanning = true;
+        }
+
+        if (chosen >= 0 && chosen < count) {
+            char ssid[33];
+            strlcpy(ssid, (const char*)aps[chosen].ssid, sizeof(ssid));
+            char pass[65] = "";
+            bool secured = aps[chosen].authmode != WIFI_AUTH_OPEN;
+            if (secured && !password_prompt(ssid, pass, sizeof(pass))) continue;
+
+            snprintf(status, sizeof(status), "conectando a %s...", ssid);
+            // Redraw once with the status, then connect and wait
+            Canvas cc = {wfb, FB_W, DISPLAY_HEIGHT};
+            ui_fill(&cc, BG);
+            ui_text(&cc, 20, 100, status, &fonts[2], LABEL, false);
+            display_present(0, DISPLAY_HEIGHT, wfb);
+
+            wifi_connect(ssid, pass);
+            bool ok = false;
+            for (int i = 0; i < 100 && !ok; i++) { ok = wifi_is_connected(); vTaskDelay(pdMS_TO_TICKS(100)); }
+            if (ok) {
+                snprintf(status, sizeof(status), "conectado a %s", ssid);
+                sound_play(SOUND_READ);
+            } else {
+                snprintf(status, sizeof(status), "falhou (senha?) em %s", ssid);
+                sound_play(SOUND_ERROR);
+            }
+        }
+    }
+
+    free(aps);
+    term_hide_bar(false);
+    term_pause(false);
+}

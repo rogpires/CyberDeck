@@ -18,7 +18,7 @@ Firmware ESP-IDF v6.1 em C, sem LVGL: tudo é desenhado à mão. Código em `mai
 | `wifi.c` | Estação Wi-Fi, credenciais salvas pelo driver, reconexão |
 | `statusbar.c` | Bateria (ADC, média, detecção de carregador) e relógio (SNTP, horário de Brasília) |
 | `badusb.c` + `badusb_hid.c` | Bad USB: teclado USB (TinyUSB) e interpretador de DuckyScript |
-| `wifitools.c` | Ferramentas de Wi-Fi passivas (modo monitor). Detector de deauth |
+| `wifitools.c` | Wi-Fi: tela de conexão (scan, lista, senha na tela) e o detector de deauth (modo monitor) |
 | `settings.c` | Tela de Ajustes: brilho, volume, auto-off, fonte (lista tocável, tudo salvo na NVS) |
 | `power.c` | Desligar (deep sleep), acordar por toque ou BOOT, desligamento automático por inatividade |
 | `storage.c` | Monta o microSD em `/sd` |
@@ -173,6 +173,10 @@ Mesma abordagem do TentacleOS (`ui_feedback.c`): tons senoidais curtos gerados n
 | OFF | 784/120, 659/120, 523/175 | ao desligar (nosso: o boot ao contrário) |
 | PLUG | 1046/45, 1568/55, 2093/80 | carregador conectado (TentacleOS: SD inserido) |
 | UNPLUG | 2093/45, 1568/55, 1046/80 | carregador removido (TentacleOS: SD removido) |
+
+## Conectar no Wi-Fi
+
+Tela cheia (`wifitools_connect_screen`, item **conectar** na categoria WiFi): `wifi_scan_list()` procura as redes, a lista mostra barras de sinal e cadeado (aberta/protegida), toca-se numa rede, a senha é digitada no teclado da tela (`osk`) e `wifi_connect()` conecta; espera até 10 s e mostra sucesso ou falha. As credenciais ficam salvas pelo driver e reconectam no boot.
 
 ## Detector de deauth
 
