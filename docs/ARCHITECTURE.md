@@ -176,7 +176,7 @@ Mesma abordagem do TentacleOS (`ui_feedback.c`): tons senoidais curtos gerados n
 
 ## Conectar no Wi-Fi
 
-Tela cheia (`wifitools_connect_screen`, item **conectar** na categoria WiFi): `wifi_scan_list()` procura as redes, a lista mostra barras de sinal e cadeado (aberta/protegida), toca-se numa rede, a senha é digitada no teclado da tela (`osk`) e `wifi_connect()` conecta; espera até 10 s e mostra sucesso ou falha. As credenciais ficam salvas pelo driver e reconectam no boot.
+Atalho: tocar no ícone de Wi-Fi do topo (status) abre esta tela em qualquer carrossel (o toque cai em `ui_hit_wifi`; o carrossel devolve `CAROUSEL_WIFI` e o menu abre a tela). Tela cheia (`wifitools_connect_screen`, também no item **conectar** da categoria WiFi): `wifi_scan_list()` procura as redes, a lista mostra barras de sinal e cadeado (aberta/protegida), toca-se numa rede, a senha é digitada no teclado da tela (`osk`) e `wifi_connect()` conecta; espera até 10 s e mostra sucesso ou falha. As credenciais ficam salvas pelo driver e reconectam no boot.
 
 ## Detector de deauth
 

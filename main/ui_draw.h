@@ -38,6 +38,8 @@ void ui_round_rect(Canvas* c, int x, int y, int w, int h, float radius, uint32_t
 
 // Status icons right-aligned at right_x: keyboard (BT), Wi-Fi fan, battery, clock. top is the text row.
 void ui_status(Canvas* c, int right_x, int top);
+// True if (x,y) is on the Wi-Fi status icon (after ui_status has drawn at least once)
+bool ui_hit_wifi(int x, int y);
 // "< MENU" back button at x, top
 void ui_back(Canvas* c, int x, int top, uint32_t color);
 // Power symbol in an 18 x 18 box

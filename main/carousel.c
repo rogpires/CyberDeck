@@ -431,7 +431,7 @@ static char next_action(int* tap_x, int* tap_y) {
         case EV_TAP:
             *tap_x = event.x;
             *tap_y = event.y;
-            return 'T';
+            return ui_hit_wifi(event.x, event.y) ? 'W' : 'T'; // the Wi-Fi status icon is a shortcut
         case EV_KEY:
             break;
         default:
@@ -563,6 +563,7 @@ int carousel_run(const char* const* labels, const int* icon_index, const uint32_
                     frame_full(&items, pos, 1.0f, float_dy);
                 }
                 break;
+            case 'W': result = CAROUSEL_WIFI; break;
             case 'T':
                 // Centre tile opens it; the sides step toward that side
                 if (tap_x >= 105 && tap_x <= 215 && tap_y >= 40 && tap_y <= 155) {

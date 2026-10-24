@@ -173,6 +173,12 @@ static void draw_battery(Canvas* c, int x, int y) {
     }
 }
 
+static int wifi_hit_x = -100, wifi_hit_top;
+
+bool ui_hit_wifi(int x, int y) {
+    return x >= wifi_hit_x - 4 && x <= wifi_hit_x + 26 && y >= wifi_hit_top - 2 && y <= wifi_hit_top + 24;
+}
+
 void ui_status(Canvas* c, int right_x, int top) {
     char clock[8] = "--:--";
     time_t now = time(NULL);
@@ -195,6 +201,8 @@ void ui_status(Canvas* c, int right_x, int top) {
     draw_battery(c, x, top + 2);
 
     x -= 28;
+    wifi_hit_x = x;
+    wifi_hit_top = top;
     draw_wifi(c, x, top + 1);
 
     x -= 18;

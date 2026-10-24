@@ -9,6 +9,7 @@
 #include "badusb.h"
 #include "osk.h"
 #include "settings.h"
+#include "wifitools.h"
 #include "shell.h"
 #include "term.h"
 
@@ -161,8 +162,10 @@ static void category_menu(const char* category, const char* icon, uint32_t accen
 
     int selected = 0;
     while (true) {
-        selected = carousel_run(labels, icon_ids, accents, count, selected, true);
-        if (selected < 0) return;
+        int chosen = carousel_run(labels, icon_ids, accents, count, selected, true);
+        if (chosen == CAROUSEL_WIFI) { wifitools_connect_screen(); continue; }
+        if (chosen < 0) return;
+        selected = chosen;
         run_command(commands[selected]);
     }
 }
@@ -190,8 +193,10 @@ void menu_open(void) {
     input_flush();
     int selected = 0;
     while (true) {
-        selected = carousel_run(labels, icon_ids, accents, HOME_COUNT, selected, false);
-        if (selected < 0) continue; // no "back" at the top level
+        int chosen = carousel_run(labels, icon_ids, accents, HOME_COUNT, selected, false);
+        if (chosen == CAROUSEL_WIFI) { wifitools_connect_screen(); continue; } // tapped the Wi-Fi icon
+        if (chosen < 0) continue; // no "back" at the top level
+        selected = chosen;
         const HomeItem* item = &home[selected];
         switch (item->kind) {
             case KIND_TERMINAL:
