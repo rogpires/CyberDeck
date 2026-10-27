@@ -177,7 +177,7 @@ Mesma abordagem do TentacleOS (`ui_feedback.c`): tons senoidais curtos gerados n
 
 ## Games
 
-Categoria **games** no menu. `game_invaders()` desenha num framebuffer 320x240 em PSRAM e envia o quadro inteiro (~20 fps, suficiente para o jogo). Lê o teclado pela fila de eventos (setas/espaço/Esc) e o toque direto (`touch_set_raw(true)` pausa a tarefa de gestos; a nave segue o dedo, um novo toque atira). Aliens em grade que descem ao bater na borda, bombas aleatórias, ondas com velocidade crescente, vidas e recorde na sessão.
+Categoria **games** no menu (ícone de gamepad). Cada jogo pode ter o seu ícone na lista via a tabela `command_icons` em `menu.c` (o Space Invaders usa o invader). `game_invaders()` desenha num framebuffer 320x240 em PSRAM e envia o quadro inteiro (~20 fps, suficiente para o jogo). Lê o teclado pela fila de eventos (setas/espaço/Esc) e o toque direto (`touch_set_raw(true)` pausa a tarefa de gestos; a nave segue o dedo, um novo toque atira). Aliens em grade que descem ao bater na borda, bombas aleatórias, ondas com velocidade crescente, vidas e recorde na sessão.
 
 ## Conectar no Wi-Fi
 

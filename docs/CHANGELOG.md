@@ -5,6 +5,7 @@ Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 ## 2026-10-27
 
 ### Games: Space Invaders
+- Ícone de **gamepad** para a categoria Games e ícone de **invader** para o Space Invaders dentro dela (tabela de ícone por comando em `menu.c`).
 - Nova categoria **Games** no menu (ícone invader, desenhado por código em `png2icons.py`/`icons.h`).
 - **Space Invaders** (`game_invaders.c`): aliens coloridos que descem, nave, tiros, bombas, ondas, vidas e recorde. Teclado (setas/espaço) ou toque (nave segue o dedo, toque atira). Modo de toque cru no driver (`touch_set_raw`).
 

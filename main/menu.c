@@ -46,7 +46,7 @@ static const HomeItem home[] = {
     {"LoRa",     "lora",      C_LORA,   KIND_MODULE,   "SX1276/SX1262 (SPI)"},
     {"Infrared", "ir",        C_IR,     KIND_MODULE,   "LED IR + TSOP38238"},
     {"Bad USB",  "usb",       C_PURPLE, KIND_BADUSB,   NULL},
-    {"Games",    "game",      0x00E5A0, KIND_CATEGORY, "games"},
+    {"Games",    "gamepad",   0x00E5A0, KIND_CATEGORY, "games"},
     {"Arquivos", "folder",    C_PURPLE, KIND_CATEGORY, "arquivos"},
     {"Ajustes",  "gear",      C_PURPLE, KIND_SETTINGS, NULL},
     {"Sistema",  "chip",      C_PURPLE, KIND_CATEGORY, "sistema"},
@@ -54,6 +54,18 @@ static const HomeItem home[] = {
     {"Terminal", "apps",      C_PURPLE, KIND_TERMINAL, NULL},
 };
 #define HOME_COUNT (sizeof(home) / sizeof(home[0]))
+
+// Per-command icon overrides (so a game in the Games carousel shows its own icon)
+static const struct { const char* command; const char* icon; } command_icons[] = {
+    {"invaders", "game"},
+};
+
+static const char* command_icon(const char* command) {
+    for (size_t i = 0; i < sizeof(command_icons) / sizeof(command_icons[0]); i++) {
+        if (strcmp(command_icons[i].command, command) == 0) return command_icons[i].icon;
+    }
+    return NULL;
+}
 
 static int icon_id(const char* name) {
     for (size_t i = 0; i < ICON_COUNT; i++) {
@@ -155,7 +167,8 @@ static void category_menu(const char* category, const char* icon, uint32_t accen
         const ShellCommand* command = shell_command_at(i);
         if (strcmp(command->category, category) != 0) continue;
         labels[count] = command->name;
-        icon_ids[count] = id;
+        const char* over = command_icon(command->name);
+        icon_ids[count] = over ? icon_id(over) : id;
         accents[count] = accent;
         commands[count] = command;
         count++;
