@@ -55,6 +55,7 @@ Quando uma ferramenta pede argumentos (ex.: o IP do `ping`), o teclado na tela a
 | rádio | `blescan`, `wifi scan`, `deauth` (detector) |
 | arquivos | `ls` `cd` `pwd` `cat` `hexdump` `write` `touch` `mkdir` `rm` `mv` `df` |
 | utils | `calc` `passgen` `sha256` `base64` `matrix` |
+| games | `invaders` |
 
 Teclado físico no terminal: **↑/↓** histórico, **Ctrl+C** interrompe, **Ctrl+L** limpa.
 
@@ -77,6 +78,12 @@ No menu (categoria WiFi) ou pelo comando `deauth`: a placa entra em modo monitor
 ## Bad USB
 
 A placa pode virar um teclado USB e digitar um script (DuckyScript) no computador — para automação e **testes autorizados** (use só em máquinas suas ou com permissão). No menu: **Bad USB**. Os scripts ficam em `/sd/badusb/*.txt`; o deck lista, mostra o script e só digita depois que você confirmar **INJETAR**. Enquanto o teclado USB está ativo, o console serial fica indisponível até reiniciar.
+
+## Games
+
+Categoria **Games** no menu. O primeiro é o **Space Invaders**: fileiras de aliens que descem, nave embaixo, tiros, bombas, ondas e recorde. Controles: **← →** move e **espaço** atira (teclado), ou **o dedo** (a nave segue o toque, tocar atira). **MENU** ou canto superior esquerdo sai.
+
+![space invaders](docs/img/invaders.png)
 
 ## Documentação
 

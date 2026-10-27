@@ -9,6 +9,7 @@
 #include "badusb.h"
 #include "osk.h"
 #include "settings.h"
+#include "tools.h"
 #include "wifitools.h"
 #include "shell.h"
 #include "term.h"
@@ -45,6 +46,7 @@ static const HomeItem home[] = {
     {"LoRa",     "lora",      C_LORA,   KIND_MODULE,   "SX1276/SX1262 (SPI)"},
     {"Infrared", "ir",        C_IR,     KIND_MODULE,   "LED IR + TSOP38238"},
     {"Bad USB",  "usb",       C_PURPLE, KIND_BADUSB,   NULL},
+    {"Games",    "game",      0x00E5A0, KIND_CATEGORY, "games"},
     {"Arquivos", "folder",    C_PURPLE, KIND_CATEGORY, "arquivos"},
     {"Ajustes",  "gear",      C_PURPLE, KIND_SETTINGS, NULL},
     {"Sistema",  "chip",      C_PURPLE, KIND_CATEGORY, "sistema"},

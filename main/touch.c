@@ -90,6 +90,7 @@ bool touch_read(int* x, int* y) {
 #define SWIPE_MIN  30
 
 static volatile bool header_enabled = true;
+static volatile bool raw_mode = false; // games read touch_read() directly; pause event generation
 
 void touch_set_header_enabled(bool enabled) {
     header_enabled = enabled;
@@ -100,10 +101,15 @@ static void push(EventType type, int x, int y) {
     input_push_event(&event);
 }
 
+void touch_set_raw(bool raw) {
+    raw_mode = raw;
+}
+
 static void gesture_task(void* arg) {
     bool was_down = false;
     int start_x = 0, start_y = 0, last_x = 0, last_y = 0;
     while (true) {
+        if (raw_mode) { vTaskDelay(pdMS_TO_TICKS(30)); was_down = false; continue; }
         int x, y;
         bool down = touch_read(&x, &y);
         if (down && !was_down) {

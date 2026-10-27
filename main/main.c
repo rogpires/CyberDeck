@@ -85,6 +85,7 @@ void app_main(void) {
     tools_sys_register();
     tools_net_register();
     tools_fs_register();
+    tools_games_register();
 
     sound_play(SOUND_BOOT);
 

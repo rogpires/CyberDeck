@@ -19,6 +19,9 @@ void touch_start_events(void);
 // "< MENU" always sends EV_BACK.
 void touch_set_header_enabled(bool enabled);
 
+// Raw mode: the gesture task stops, so a game can poll touch_read() directly
+void touch_set_raw(bool raw);
+
 // The board's I2C0 bus (i2c_master_bus_handle_t), shared by the touch controller and the audio codec.
 // Valid after touch_init().
 void* board_i2c_bus(void);

@@ -18,6 +18,7 @@ Firmware ESP-IDF v6.1 em C, sem LVGL: tudo é desenhado à mão. Código em `mai
 | `wifi.c` | Estação Wi-Fi, credenciais salvas pelo driver, reconexão |
 | `statusbar.c` | Bateria (ADC, média, detecção de carregador) e relógio (SNTP, horário de Brasília) |
 | `badusb.c` + `badusb_hid.c` | Bad USB: teclado USB (TinyUSB) e interpretador de DuckyScript |
+| `game_invaders.c` | Space Invaders (framebuffer próprio, teclado + toque cru) |
 | `wifitools.c` | Wi-Fi: tela de conexão (scan, lista, senha na tela) e o detector de deauth (modo monitor) |
 | `settings.c` | Tela de Ajustes: brilho, volume, auto-off, fonte (lista tocável, tudo salvo na NVS) |
 | `power.c` | Desligar (deep sleep), acordar por toque ou BOOT, desligamento automático por inatividade |
@@ -173,6 +174,10 @@ Mesma abordagem do TentacleOS (`ui_feedback.c`): tons senoidais curtos gerados n
 | OFF | 784/120, 659/120, 523/175 | ao desligar (nosso: o boot ao contrário) |
 | PLUG | 1046/45, 1568/55, 2093/80 | carregador conectado (TentacleOS: SD inserido) |
 | UNPLUG | 2093/45, 1568/55, 1046/80 | carregador removido (TentacleOS: SD removido) |
+
+## Games
+
+Categoria **games** no menu. `game_invaders()` desenha num framebuffer 320x240 em PSRAM e envia o quadro inteiro (~20 fps, suficiente para o jogo). Lê o teclado pela fila de eventos (setas/espaço/Esc) e o toque direto (`touch_set_raw(true)` pausa a tarefa de gestos; a nave segue o dedo, um novo toque atira). Aliens em grade que descem ao bater na borda, bombas aleatórias, ondas com velocidade crescente, vidas e recorde na sessão.
 
 ## Conectar no Wi-Fi
 
