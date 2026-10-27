@@ -19,6 +19,7 @@ Firmware ESP-IDF v6.1 em C, sem LVGL: tudo é desenhado à mão. Código em `mai
 | `statusbar.c` | Bateria (ADC, média, detecção de carregador) e relógio (SNTP, horário de Brasília) |
 | `badusb.c` + `badusb_hid.c` | Bad USB: teclado USB (TinyUSB) e interpretador de DuckyScript |
 | `game_invaders.c` | Space Invaders (framebuffer próprio, teclado + toque cru) |
+| `game_enduro.c` | Enduro: corrida com estrada em perspectiva |
 | `wifitools.c` | Wi-Fi: tela de conexão (scan, lista, senha na tela) e o detector de deauth (modo monitor) |
 | `settings.c` | Tela de Ajustes: brilho, volume, auto-off, fonte (lista tocável, tudo salvo na NVS) |
 | `power.c` | Desligar (deep sleep), acordar por toque ou BOOT, desligamento automático por inatividade |

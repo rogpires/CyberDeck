@@ -55,7 +55,7 @@ Quando uma ferramenta pede argumentos (ex.: o IP do `ping`), o teclado na tela a
 | rádio | `blescan`, `wifi scan`, `deauth` (detector) |
 | arquivos | `ls` `cd` `pwd` `cat` `hexdump` `write` `touch` `mkdir` `rm` `mv` `df` |
 | utils | `calc` `passgen` `sha256` `base64` `matrix` |
-| games | `invaders` |
+| games | `invaders` `enduro` |
 
 Teclado físico no terminal: **↑/↓** histórico, **Ctrl+C** interrompe, **Ctrl+L** limpa.
 
@@ -81,9 +81,12 @@ A placa pode virar um teclado USB e digitar um script (DuckyScript) no computado
 
 ## Games
 
-Categoria **Games** no menu. O primeiro é o **Space Invaders**: fileiras de aliens que descem, nave embaixo, tiros, bombas, ondas e recorde. Controles: **← →** move e **espaço** atira (teclado), ou **o dedo** (a nave segue o toque, tocar atira). **MENU** ou canto superior esquerdo sai.
+Categoria **Games** no menu. - **Space Invaders**: aliens que descem, nave, tiros, bombas, ondas e recorde. **← →** move, **espaço** atira (ou o dedo).
+- **Enduro**: corrida em perspectiva — ultrapasse os carros, ciclo de dia/noite. **← →** viram, **↑ ↓** aceleram/freiam (ou o dedo: segue e acelera).
 
-![space invaders](docs/img/invaders.png)
+Em todos, **MENU** ou o canto superior esquerdo saem.
+
+![space invaders](docs/img/invaders.png) ![enduro](docs/img/enduro.png)
 
 ## Documentação
 

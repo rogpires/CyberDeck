@@ -4,6 +4,9 @@ Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 
 ## 2026-10-27
 
+### Games: Enduro
+- **Enduro** (`game_enduro.c`): estrada em perspectiva (faixas rumble, linha central), carros que crescem ao se aproximar, placar de carros a ultrapassar, dias com ciclo de cor (dia/anoitecer/noite/amanhecer), acelerador/freio. Teclado (setas) ou toque. Ícone de carro.
+
 ### Games: Space Invaders
 - Ícone de **gamepad** para a categoria Games e ícone de **invader** para o Space Invaders dentro dela (tabela de ícone por comando em `menu.c`).
 - Nova categoria **Games** no menu (ícone invader, desenhado por código em `png2icons.py`/`icons.h`).

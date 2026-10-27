@@ -58,6 +58,7 @@ static const HomeItem home[] = {
 // Per-command icon overrides (so a game in the Games carousel shows its own icon)
 static const struct { const char* command; const char* icon; } command_icons[] = {
     {"invaders", "game"},
+    {"enduro", "car"},
 };
 
 static const char* command_icon(const char* command) {
