@@ -110,6 +110,19 @@ int wifi_scan_list(wifi_ap_record_t* out, int max) {
     return count;
 }
 
+int wifi_scan_list_fast(wifi_ap_record_t* out, int max) {
+    // Short per-channel dwell so the scan finishes quickly enough to feel live.
+    wifi_scan_config_t cfg = {
+        .show_hidden = true,
+        .scan_type = WIFI_SCAN_TYPE_ACTIVE,
+        .scan_time = {.active = {.min = 20, .max = 60}},
+    };
+    if (esp_wifi_scan_start(&cfg, true) != ESP_OK) return 0;
+    uint16_t count = max;
+    if (esp_wifi_scan_get_ap_records(&count, out) != ESP_OK) return 0;
+    return count;
+}
+
 // True while a connection attempt is in progress or connected to `ssid`
 bool wifi_current_ssid(char* out, int size) {
     wifi_config_t config;

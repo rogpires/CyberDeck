@@ -52,7 +52,7 @@ Quando uma ferramenta pede argumentos (ex.: o IP do `ping`), o teclado na tela a
 |---|---|
 | sistema | `menu` `sysinfo` `date` `uptime` `mem` `wifi` `bt` `font` `volume` `bateria` `desligar` `autooff` `touchtest` `reboot` |
 | rede | `ping` `netscan` `portscan` `dns` `http` `myip` `weather` |
-| rádio | `blescan`, `wifi scan`, `deauth` (detector) |
+| rádio | `blescan`, `wifi scan`, `deauth` (detector), `canais` (analisador) |
 | arquivos | `ls` `cd` `pwd` `cat` `hexdump` `write` `touch` `mkdir` `rm` `mv` `df` |
 | utils | `calc` `passgen` `sha256` `base64` `matrix` |
 | games | `invaders` `enduro` |
@@ -74,6 +74,12 @@ Teclado físico no terminal: **↑/↓** histórico, **Ctrl+C** interrompe, **Ct
 ## Detector de deauth
 
 No menu (categoria WiFi) ou pelo comando `deauth`: a placa entra em modo monitor (escuta passiva, **não transmite nada**) e mostra ao vivo os quadros de *deauthentication/disassociation* no ar — total, taxa por segundo num gráfico, canal e a origem — com alerta quando há um ataque em andamento. Serve para **aprender e detectar** o ataque pelo lado da defesa. Ao sair, reconecta no Wi-Fi salvo.
+
+## Analisador de canais Wi-Fi
+
+No menu (categoria WiFi) ou pelo comando `canais`: a placa varre a banda de 2.4 GHz e mostra o espectro como num analisador — cada rede vira uma "montanha" centrada no seu canal, com a altura pela força do sinal, todas sobrepostas. Em cima mostra quantas redes achou e qual o **melhor canal** (o menos congestionado entre 1, 6 e 11, em verde), e nomeia as três redes mais fortes. É **em tempo real**: varre continuamente e redesenha sem piscar (~2×/s), sem transmitir nada. **MENU** volta. (Enquanto o analisador roda, o Wi-Fi fica em varredura, então a conexão cai e reconecta ao sair.)
+
+![analisador de canais](docs/img/canais.png)
 
 ## Bad USB
 

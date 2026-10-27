@@ -4,6 +4,15 @@ Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 
 ## 2026-10-27
 
+### Analisador de canais Wi-Fi
+- Ferramenta **`canais`** (categoria WiFi): varre o espectro 2.4 GHz e desenha a visão clássica de analisador — uma "montanha" translúcida por rede, centrada no canal e com altura pelo sinal, sobrepostas. Conta as redes, nomeia as três mais fortes e recomenda o canal menos congestionado entre 1/6/11 (destacado em verde).
+- **Tempo real:** varredura de dwell curto, contínua, redesenhando sem apagar a tela (atualiza ~2×/s). Não transmite nada; MENU volta.
+- Sem barra de status nessa tela: a varredura derruba a conexão, então o ícone de Wi-Fi do topo apareceria "apagado".
+- Preview renderizado no Mac antes de gravar (`docs/img/canais.png`), com harness de host que compila o `ui_draw.c` real.
+
+### Mapa de telas (artefato)
+- Artefato interativo com o mapa de navegação do firmware (home → categorias → telas/ferramentas/jogos + sobreposições), no estilo do simulador do Highboy, com as telas reais renderizadas e a paleta do deck. Gerado de `docs/img/*.png`; não vive no repo (link do claude.ai).
+
 ### Games: Enduro
 - Carros redesenhados como F1 vistos por trás (aerofólio, rodas, capacete), no lugar das caixinhas.
 - **Enduro** (`game_enduro.c`): estrada em perspectiva (faixas rumble, linha central), carros que crescem ao se aproximar, placar de carros a ultrapassar, dias com ciclo de cor (dia/anoitecer/noite/amanhecer), acelerador/freio. Teclado (setas) ou toque. Ícone de carro.

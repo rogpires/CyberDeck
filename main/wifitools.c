@@ -236,6 +236,171 @@ void wifitools_deauth_detector(void) {
     wifi_reconnect();
 }
 
+// Wi-Fi channel analyzer: scan the 2.4 GHz band and draw it as the classic spectrum
+// view - one translucent "hump" per network, centred on its channel, as tall as its
+// signal. Counts the networks on each channel and recommends the least congested of
+// the non-overlapping channels 1/6/11. Active scan only, transmits nothing on purpose.
+
+#define CA_MAX 32
+
+// A distinct colour per network, cycled.
+static const uint32_t CA_PAL[] = {
+    0xBF00FF, 0x00BCD4, 0x4ADE80, 0xFFC107, 0xD158F2, 0x5B8CFF, 0x00E5A0, 0xFF6EC7,
+};
+#define CA_PAL_N (sizeof(CA_PAL) / sizeof(CA_PAL[0]))
+
+// Map an RSSI (dBm) to a bar height: -90 dBm -> 0, -30 dBm -> full.
+static int ca_signal_h(int rssi, int gh) {
+    int v = rssi + 90;
+    if (v < 0) v = 0;
+    if (v > 60) v = 60;
+    return v * gh / 60;
+}
+
+static void draw_channels(wifi_ap_record_t* aps, int count) {
+    Canvas c = {fb, FB_W, FB_H};
+    ui_fill(&c, BG);
+    ui_back(&c, 6, 2, ACCENT);
+    // No status bar here: scanning drops the STA link, so its Wi-Fi icon would show "off".
+    ui_text(&c, 20, 22, "ANALISADOR WI-FI", &fonts[3], LABEL, false);
+
+    // Count networks per channel and score the three non-overlapping channels.
+    const int cand[3] = {1, 6, 11};
+    float score[14] = {0};
+    for (int k = 0; k < 3; k++) {
+        int ch = cand[k];
+        for (int i = 0; i < count; i++) {
+            int ca = aps[i].primary;
+            if (ca < 1 || ca > 13) continue;
+            float w = aps[i].rssi + 100;  // weight stronger APs more
+            if (w < 10) w = 10;
+            float overlap = 1.0f - fabsf((float)(ca - ch)) / 5.0f;  // 2.4 GHz channels overlap ~+-4
+            if (overlap > 0) score[ch] += w * overlap;
+        }
+    }
+    int best = cand[0];
+    for (int k = 1; k < 3; k++) if (score[cand[k]] < score[best]) best = cand[k];
+
+    char sub[48];
+    snprintf(sub, sizeof(sub), "%d redes   melhor canal: %d", count, best);
+    ui_text(&c, 20, 48, sub, &fonts[2], ACCENT, false);
+
+    // Graph area.
+    int gx = 22, gy = 74, gw = FB_W - 44, gh = 112;
+    int base = gy + gh;
+    float step = (float)gw / 12.0f;  // 13 channels -> 12 gaps
+    int hw = (int)(step * 2.0f);     // each AP spans ~ +-2 channels
+
+    // Channel grid and labels (recommended channels and the winner stand out).
+    for (int ch = 1; ch <= 13; ch++) {
+        int x = gx + (int)((ch - 1) * step);
+        for (int y = gy; y < base; y += 3) ui_blend(&c, x, y, 0x2A1C45, 110);
+        bool rec = (ch == 1 || ch == 6 || ch == 11);
+        char lbl[4];
+        snprintf(lbl, sizeof(lbl), "%d", ch);
+        int lw = (int)strlen(lbl) * 5;  // fonts[0] is 5 px wide
+        uint32_t lc = (ch == best) ? OK : (rec ? 0xB9A7D6 : DIM);
+        ui_text(&c, x - lw / 2, base + 4, lbl, &fonts[0], lc, false);
+    }
+    for (int x = 0; x < gw; x++) ui_blend(&c, gx + x, base, 0x4A3A6A, 200);
+
+    // One parabolic hump per network, filled translucent so overlaps build up.
+    for (int i = 0; i < count; i++) {
+        int ca = aps[i].primary;
+        if (ca < 1 || ca > 13) continue;
+        uint32_t col = CA_PAL[i % CA_PAL_N];
+        int cx = gx + (int)((ca - 1) * step);
+        int peak = ca_signal_h(aps[i].rssi, gh);
+        if (peak < 4) peak = 4;
+        for (int dx = -hw; dx <= hw; dx++) {
+            int x = cx + dx;
+            if (x < gx || x > gx + gw) continue;
+            float t = (float)dx / hw;              // -1..1
+            int h = (int)(peak * (1.0f - t * t));  // parabola
+            if (h <= 0) continue;
+            for (int y = 0; y < h; y++) ui_blend(&c, x, base - 1 - y, col, 58);
+            ui_blend(&c, x, base - 1 - h, col, 230);  // bright top edge
+        }
+    }
+
+    if (count == 0) {
+        ui_text(&c, 20, gy + gh / 2, "nenhuma rede encontrada", &fonts[2], DIM, false);
+    } else {
+        // Name the three strongest, near their peaks.
+        int order[CA_MAX];
+        for (int i = 0; i < count; i++) order[i] = i;
+        for (int a = 0; a < count && a < 3; a++) {
+            int mx = a;
+            for (int b = a + 1; b < count; b++)
+                if (aps[order[b]].rssi > aps[order[mx]].rssi) mx = b;
+            int tmp = order[a]; order[a] = order[mx]; order[mx] = tmp;
+        }
+        for (int a = 0; a < count && a < 3; a++) {
+            int i = order[a];
+            int ca = aps[i].primary;
+            if (ca < 1 || ca > 13) continue;
+            int cx = gx + (int)((ca - 1) * step);
+            int peak = ca_signal_h(aps[i].rssi, gh);
+            const char* ssid = aps[i].ssid[0] ? (const char*)aps[i].ssid : "(oculta)";
+            char name[14];
+            strlcpy(name, ssid, sizeof(name));
+            int tw = (int)strlen(name) * 6;  // fonts[1] is 6 px wide
+            int tx = cx - tw / 2;
+            if (tx < gx) tx = gx;
+            if (tx + tw > gx + gw) tx = gx + gw - tw;
+            int ty = base - peak - 12;
+            if (ty < gy) ty = gy;
+            ui_text(&c, tx, ty, name, &fonts[1], CA_PAL[i % CA_PAL_N], true);
+        }
+    }
+
+    ui_text(&c, 20, FB_H - 14, "ao vivo - varredura passiva - MENU volta", &fonts[1], DIM, false);
+    display_present(0, FB_H, fb);
+}
+
+void wifitools_channel_analyzer(void) {
+    if (fb == NULL) fb = heap_caps_malloc(FB_W * FB_H * sizeof(uint16_t), MALLOC_CAP_SPIRAM);
+    wifi_ap_record_t* aps = heap_caps_malloc(CA_MAX * sizeof(wifi_ap_record_t), MALLOC_CAP_SPIRAM);
+    if (fb == NULL || aps == NULL) { free(aps); return; }
+
+    term_pause(true);
+    term_hide_bar(true);
+
+    // First frame before the first scan lands, so the screen isn't blank.
+    Canvas c = {fb, FB_W, FB_H};
+    ui_fill(&c, BG);
+    ui_back(&c, 6, 2, ACCENT);
+    ui_text(&c, 20, 22, "ANALISADOR WI-FI", &fonts[3], LABEL, false);
+    ui_text(&c, 20, 110, "varrendo o espectro...", &fonts[2], DIM, false);
+    display_present(0, FB_H, fb);
+
+    bool run = true;
+    while (run) {
+        // Scan and redraw continuously: a short-dwell scan is quick, so the spectrum
+        // updates live without ever blanking the screen.
+        int count = wifi_scan_list_fast(aps, CA_MAX);
+        draw_channels(aps, count);
+
+        // Drain any pending input between scans (no long block, stays responsive).
+        InputEvent event;
+        while (run && input_wait(&event, 10)) {
+            if (event.type == EV_BACK) run = false;
+            else if (event.type == EV_KEY) {
+                char ch = event.key;
+                if (ch == 0x1b || ch == 'q') {
+                    char nx;
+                    if (ch == 0x1b && input_read(&nx, 20) && (nx == '[' || nx == 'O')) input_read(&nx, 20);
+                    else run = false;
+                }
+            }
+        }
+    }
+
+    free(aps);
+    term_hide_bar(false);
+    term_pause(false);
+}
+
 // Wi-Fi connect screen: scan, pick a network, type the password on-screen, connect.
 
 #include "osk.h"

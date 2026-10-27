@@ -533,6 +533,10 @@ static void cmd_deauth(int argc, char** argv) {
     wifitools_deauth_detector();
 }
 
+static void cmd_canais(int argc, char** argv) {
+    wifitools_channel_analyzer();
+}
+
 static void cmd_wifi_connect_ui(int argc, char** argv) {
     wifitools_connect_screen();
 }
@@ -547,6 +551,7 @@ static const ShellCommand commands[] = {
     {"myip",     "rede",  NULL,                        "ip publico e provedor",              cmd_myip},
     {"weather",  "rede",  "[cidade]",                  "previsao do tempo (wttr.in)",        cmd_weather},
     {"deauth",   "rede",  NULL,                        "detecta ataques de deauth no ar (passivo)", cmd_deauth},
+    {"canais",   "rede",  NULL,                        "analisa os canais wi-fi (espectro)", cmd_canais},
     {"blescan",  "radio", "[segundos]",                "dispositivos bluetooth por perto",   cmd_blescan},
 };
 
