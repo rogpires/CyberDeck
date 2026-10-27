@@ -67,13 +67,50 @@ static void day_colors(uint16_t* sky, uint16_t* grass, uint16_t* road) {
     *road = display_color(r >> 16 & 0xFF, r >> 8 & 0xFF, r & 0xFF);
 }
 
+static void fdisc(int cx, int cy, int r, uint16_t c) {
+    for (int dy = -r; dy <= r; dy++)
+        for (int dx = -r; dx <= r; dx++)
+            if (dx * dx + dy * dy <= r * r) fill(cx + dx, cy + dy, 1, 1, c);
+}
+
+// Rear view of an F1-style car, scaled into w x h centred on (cx,cy)
 static void draw_car(int cx, int cy, int w, int h, uint32_t color) {
     uint16_t body = display_color(color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF);
-    uint16_t dark = display_color((color >> 16 & 0xFF) / 2, (color >> 8 & 0xFF) / 2, (color & 0xFF) / 2);
-    fill(cx - w / 2, cy - h / 2, w, h, body);
-    fill(cx - w / 2 - 2, cy - h / 2 + 2, 3, h - 4, dark);   // wheels
-    fill(cx + w / 2 - 1, cy - h / 2 + 2, 3, h - 4, dark);
-    fill(cx - w / 4, cy - h / 4, w / 2, h / 3, dark);       // windshield
+    uint16_t light = display_color((color >> 16 & 0xFF) + (255 - (color >> 16 & 0xFF)) / 3,
+                                   (color >> 8 & 0xFF) + (255 - (color >> 8 & 0xFF)) / 3,
+                                   (color & 0xFF) + (255 - (color & 0xFF)) / 3);
+    uint16_t tyre = display_color(0x1A, 0x1A, 0x20);
+    uint16_t dark = display_color(0x05, 0x05, 0x08);
+    int x0 = cx - w / 2, y0 = cy - h / 2;
+
+    // Rear tyres (fat, dark), lower two-thirds on each side
+    int tw = w * 24 / 100, th = h * 52 / 100;
+    fill(x0, y0 + h - th, tw, th, tyre);
+    fill(x0 + w - tw, y0 + h - th, tw, th, tyre);
+    fill(x0 + 1, y0 + h - th, 2, th, dark);                 // tyre shading
+    fill(x0 + w - 3, y0 + h - th, 2, th, dark);
+
+    // Body: a tapered column (narrow nose at top, wider toward the rear)
+    for (int yy = 0; yy < h; yy++) {
+        float t = (float)yy / h;                            // 0 top .. 1 rear
+        int bw = (int)(w * (0.20f + 0.26f * t));            // widens toward the back
+        int bx = cx - bw / 2;
+        uint16_t c = yy < h / 3 ? light : body;             // nose a touch lighter
+        fill(bx, y0 + yy, bw, 1, c);
+    }
+
+    // Rear wing: a wide bar across the top with end plates
+    int wing_y = y0 + h * 8 / 100, wing_h = h * 14 / 100;
+    if (wing_h < 2) wing_h = 2;
+    fill(x0 + tw / 2, wing_y, w - tw, wing_h, dark);
+    fill(x0 + tw / 2, wing_y, 2, wing_h + 2, dark);         // end plates
+    fill(x0 + w - tw / 2 - 2, wing_y, 2, wing_h + 2, dark);
+
+    // Cockpit + helmet
+    if (w >= 16) {
+        fdisc(cx, y0 + h * 48 / 100, w * 12 / 100, dark);
+        fdisc(cx, y0 + h * 46 / 100, w * 7 / 100, light);
+    }
 }
 
 static void render(void) {

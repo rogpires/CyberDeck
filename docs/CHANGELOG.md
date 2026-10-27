@@ -5,6 +5,7 @@ Registro do que foi feito, mais recente primeiro. Atualizar a cada mudança.
 ## 2026-10-27
 
 ### Games: Enduro
+- Carros redesenhados como F1 vistos por trás (aerofólio, rodas, capacete), no lugar das caixinhas.
 - **Enduro** (`game_enduro.c`): estrada em perspectiva (faixas rumble, linha central), carros que crescem ao se aproximar, placar de carros a ultrapassar, dias com ciclo de cor (dia/anoitecer/noite/amanhecer), acelerador/freio. Teclado (setas) ou toque. Ícone de carro.
 
 ### Games: Space Invaders
